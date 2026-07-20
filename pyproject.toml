@@ -42,7 +42,7 @@ dev = [
     "pytest-dotenv~=0.5",
     "pytest-timeout~=2.3",
     "ruff~=0.8",
-    "semversioner~=2.0",
+    "semversioner>=2,<4",
     "update-toml~=0.2",
     "pytest-xdist[psutil]~=3.8.0",
 ]
