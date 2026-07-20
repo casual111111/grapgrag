@@ -58,6 +58,9 @@ docsite/
 # PyCharm
 .idea/
 
+# Local analysis tooling
+.bevel/
+
 # Jupyter notebook
 .ipynb_checkpoints/
 

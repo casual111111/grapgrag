@@ -9,10 +9,11 @@
 			"module": "graphrag",
 			"args": [
 				"index",
-				"--root", 
+				"--root",
 				"${input:root_folder}"
 			],
-			"console": "integratedTerminal"
+			"console": "integratedTerminal",
+			"justMyCode": false
 		},
 		{
 			"name": "Update",
