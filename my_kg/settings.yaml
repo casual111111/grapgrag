@@ -1,0 +1,125 @@
+# GraphRAG configuration for a knowledge graph without communities.
+# Model runtime values and secrets are loaded from .env.
+
+# Language model configurations (new unified format)
+models:
+  default_chat_model:
+    type: chat
+    model_provider: ${GRAPHRAG_CHAT_MODEL_PROVIDER}
+    model: ${GRAPHRAG_CHAT_MODEL}
+    auth_type: ${GRAPHRAG_MODEL_AUTH_METHOD}
+    api_key: ${GRAPHRAG_CHAT_API_KEY}
+    api_base: ${GRAPHRAG_CHAT_API_BASE}
+    request_timeout: ${GRAPHRAG_CHAT_TIMEOUT}
+    max_tokens: ${GRAPHRAG_CHAT_MAX_TOKENS}
+    retry_strategy: ${GRAPHRAG_MODEL_RETRY_TYPE}
+    max_retries: ${GRAPHRAG_MODEL_MAX_RETRIES}
+    concurrent_requests: ${GRAPHRAG_CONCURRENT_REQUESTS}
+    async_mode: ${GRAPHRAG_ASYNC_MODE}
+
+  default_embedding_model:
+    type: embedding
+    model_provider: ${GRAPHRAG_EMBEDDING_MODEL_PROVIDER}
+    model: ${GRAPHRAG_EMBEDDING_MODEL}
+    auth_type: ${GRAPHRAG_MODEL_AUTH_METHOD}
+    api_key: ${GRAPHRAG_EMBEDDING_API_KEY}
+    api_base: ${GRAPHRAG_EMBEDDING_API_BASE}
+    retry_strategy: ${GRAPHRAG_MODEL_RETRY_TYPE}
+    max_retries: ${GRAPHRAG_MODEL_MAX_RETRIES}
+    concurrent_requests: ${GRAPHRAG_CONCURRENT_REQUESTS}
+    async_mode: ${GRAPHRAG_ASYNC_MODE}
+
+# Input documents
+input:
+  type: text
+  encoding: utf-8
+  file_pattern: ".*\\.md$$"
+
+input_storage:
+  type: file
+  base_dir: input
+
+# Text-unit chunking
+chunking:
+  type: tokens
+  size: 1200
+  overlap: 100
+  encoding_model: o200k_base
+
+# Tables, cache, logs, and vectors
+output_storage:
+  type: file
+  base_dir: output
+
+table_provider:
+  type: parquet
+
+cache:
+  type: file
+  storage:
+    type: file
+    base_dir: cache
+
+reporting:
+  type: file
+  base_dir: logs
+
+vector_store:
+  default_vector_store:
+    type: lancedb
+    db_uri: output/lancedb
+
+# Explicit no-community indexing pipeline
+workflows:
+  - load_input_documents
+  - create_base_text_units
+  - create_final_documents
+  - extract_graph
+  - finalize_graph
+  - create_final_text_units
+  - generate_text_embeddings
+
+# Generate only embeddings needed by entity-based Local Search and Basic Search.
+embed_text:
+  model_id: default_embedding_model
+  batch_size: ${GRAPHRAG_EMBEDDING_BATCH_SIZE}
+  batch_max_tokens: ${GRAPHRAG_EMBEDDING_BATCH_MAX_TOKENS}
+  names:
+    - entity_description
+    - text_unit_text
+
+extract_graph:
+  model_id: default_chat_model
+  prompt: prompts/extract_graph.txt
+  entity_types:
+    - concept
+    - state
+    - event
+    - rule
+    - formula
+    - config_param
+  max_gleanings: 1
+
+summarize_descriptions:
+  model_id: default_chat_model
+  prompt: prompts/summarize_descriptions.txt
+  max_length: 500
+
+extract_claims:
+  enabled: false
+
+snapshots:
+  graphml: false
+  embeddings: false
+  raw_graph: false
+
+# Local Search without community reports
+local_search:
+  chat_model_id: default_chat_model
+  embedding_model_id: default_embedding_model
+  prompt: prompts/local_search_system_prompt.txt
+  community_prop: 0.0
+  text_unit_prop: 0.5
+  max_context_tokens: 16000
+  top_k_entities: 18
+  top_k_relationships: 18
