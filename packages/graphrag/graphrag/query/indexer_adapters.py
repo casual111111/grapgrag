@@ -72,15 +72,20 @@ def read_indexer_relationships(final_relationships: pd.DataFrame) -> list[Relati
 
 
 def read_indexer_reports(
-    final_community_reports: pd.DataFrame,
-    final_communities: pd.DataFrame,
+    final_community_reports: pd.DataFrame | None,
+    final_communities: pd.DataFrame | None,
     community_level: int | None,
     dynamic_community_selection: bool = False,
 ) -> list[CommunityReport]:
-    """Read in the Community Reports from the raw indexing outputs.
+    """Read community reports, returning none when community data is absent."""
+    if (
+        final_community_reports is None
+        or final_communities is None
+        or final_community_reports.empty
+        or final_communities.empty
+    ):
+        return []
 
-    If not dynamic_community_selection, then select reports with the max community level that an entity belongs to.
-    """
     reports_df = final_community_reports
     nodes_df = final_communities.explode("entity_ids")
 
@@ -119,31 +124,36 @@ def read_indexer_report_embeddings(
 
 def read_indexer_entities(
     entities: pd.DataFrame,
-    communities: pd.DataFrame,
+    communities: pd.DataFrame | None,
     community_level: int | None,
 ) -> list[Entity]:
-    """Read in the Entities from the raw indexing outputs."""
-    community_join = communities.explode("entity_ids").loc[
-        :, ["community", "level", "entity_ids"]
-    ]
-    nodes_df = entities.merge(
-        community_join, left_on="id", right_on="entity_ids", how="left"
-    )
+    """Read entities with optional community memberships."""
+    community_col = None
+    final_df = entities
 
-    if community_level is not None:
-        nodes_df = _filter_under_community_level(nodes_df, community_level)
+    if communities is not None and not communities.empty:
+        community_join = communities.explode("entity_ids").loc[
+            :, ["community", "level", "entity_ids"]
+        ]
+        nodes_df = entities.merge(
+            community_join, left_on="id", right_on="entity_ids", how="left"
+        )
 
-    nodes_df = nodes_df.loc[:, ["id", "community"]]
-    nodes_df["community"] = nodes_df["community"].fillna(-1)
-    # group entities by id and degree and remove duplicated community IDs
-    nodes_df = nodes_df.groupby(["id"]).agg({"community": set}).reset_index()
-    nodes_df["community"] = nodes_df["community"].apply(
-        lambda x: [str(int(i)) for i in x]
-    )
-    final_df = nodes_df.merge(entities, on="id", how="inner").drop_duplicates(
-        subset=["id"]
-    )
-    # read entity dataframe to knowledge model objects
+        if community_level is not None:
+            nodes_df = _filter_under_community_level(nodes_df, community_level)
+
+        nodes_df = nodes_df.loc[:, ["id", "community"]]
+        nodes_df["community"] = nodes_df["community"].fillna(-1)
+        # group entities by id and remove duplicated community IDs
+        nodes_df = nodes_df.groupby(["id"]).agg({"community": set}).reset_index()
+        nodes_df["community"] = nodes_df["community"].apply(
+            lambda x: [str(int(i)) for i in x]
+        )
+        final_df = nodes_df.merge(entities, on="id", how="inner").drop_duplicates(
+            subset=["id"]
+        )
+        community_col = "community"
+
     return read_entities(
         df=final_df,
         id_col="id",
@@ -151,7 +161,7 @@ def read_indexer_entities(
         type_col="type",
         short_id_col="human_readable_id",
         description_col="description",
-        community_col="community",
+        community_col=community_col,
         rank_col="degree",
         name_embedding_col=None,
         description_embedding_col="description_embedding",

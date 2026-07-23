@@ -14,6 +14,5 @@ all_embeddings: set[str] = {
 }
 default_embeddings: list[str] = [
     entity_description_embedding,
-    community_full_content_embedding,
     text_unit_text_embedding,
 ]

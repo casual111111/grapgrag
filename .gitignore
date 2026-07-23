@@ -70,3 +70,11 @@ packages/*/LICENSE
 # Notebooks outputs
 packages/graphrag-*/example_notebooks/**/output
 packages/graphrag-*/example_notebooks/**/cache
+# my_kg generated files
+my_kg/cache/
+my_kg/output/
+my_kg/logs/
+my_kg/*.log
+
+# Run logs
+run_index_*.log

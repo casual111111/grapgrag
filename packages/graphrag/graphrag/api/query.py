@@ -191,8 +191,8 @@ def global_search_streaming(
 async def local_search(
     config: GraphRagConfig,
     entities: pd.DataFrame,
-    communities: pd.DataFrame,
-    community_reports: pd.DataFrame,
+    communities: pd.DataFrame | None,
+    community_reports: pd.DataFrame | None,
     text_units: pd.DataFrame,
     relationships: pd.DataFrame,
     covariates: pd.DataFrame | None,
@@ -207,14 +207,18 @@ async def local_search(
 ]:
     """Perform a local search and return the context data and response.
 
+    Community data is optional. When omitted, local search uses entities,
+    relationships, covariates, and source text units only.
+
     ----------
     - config (GraphRagConfig): A graphrag configuration (from settings.yaml)
     - entities (pd.DataFrame): A DataFrame containing the final entities (from entities.parquet)
-    - community_reports (pd.DataFrame): A DataFrame containing the final community reports (from community_reports.parquet)
+    - communities (pd.DataFrame | None): Optional final communities.
+    - community_reports (pd.DataFrame | None): Optional final community reports.
     - text_units (pd.DataFrame): A DataFrame containing the final text units (from text_units.parquet)
     - relationships (pd.DataFrame): A DataFrame containing the final relationships (from relationships.parquet)
     - covariates (pd.DataFrame): A DataFrame containing the final covariates (from covariates.parquet)
-    - community_level (int): The community level to search at.
+    - community_level (int): The community level to search at when community data is provided.
     - response_type (str): The response type to return.
     - query (str): The user query to search for.
 
@@ -259,8 +263,8 @@ async def local_search(
 def local_search_streaming(
     config: GraphRagConfig,
     entities: pd.DataFrame,
-    communities: pd.DataFrame,
-    community_reports: pd.DataFrame,
+    communities: pd.DataFrame | None,
+    community_reports: pd.DataFrame | None,
     text_units: pd.DataFrame,
     relationships: pd.DataFrame,
     covariates: pd.DataFrame | None,
@@ -270,23 +274,10 @@ def local_search_streaming(
     callbacks: list[QueryCallbacks] | None = None,
     verbose: bool = False,
 ) -> AsyncGenerator:
-    """Perform a local search and return the context data and response via a generator.
+    """Perform a local search and return the response via a generator.
 
-    Parameters
-    ----------
-    - config (GraphRagConfig): A graphrag configuration (from settings.yaml)
-    - entities (pd.DataFrame): A DataFrame containing the final entities (from entities.parquet)
-    - community_reports (pd.DataFrame): A DataFrame containing the final community reports (from community_reports.parquet)
-    - text_units (pd.DataFrame): A DataFrame containing the final text units (from text_units.parquet)
-    - relationships (pd.DataFrame): A DataFrame containing the final relationships (from relationships.parquet)
-    - covariates (pd.DataFrame): A DataFrame containing the final covariates (from covariates.parquet)
-    - community_level (int): The community level to search at.
-    - response_type (str): The response type to return.
-    - query (str): The user query to search for.
-
-    Returns
-    -------
-    TODO: Document the search response type and format.
+    Community data is optional. When omitted, no community reports are loaded
+    or added to the model context.
     """
     init_loggers(config=config, verbose=verbose, filename="query.log")
 

@@ -119,9 +119,10 @@ def run_local_search(
     query: str,
     verbose: bool,
 ):
-    """Perform a local search with a given query.
+    """Perform a local search without community data.
 
-    Loads index files required for local search and calls the Query API.
+    Loads the entity, relationship, text-unit, and optional covariate index files,
+    then calls the Query API with community inputs disabled.
     """
     cli_overrides: dict[str, Any] = {}
     if data_dir:
@@ -134,8 +135,6 @@ def run_local_search(
     dataframe_dict = _resolve_output_files(
         config=config,
         output_list=[
-            "communities",
-            "community_reports",
             "text_units",
             "relationships",
             "entities",
@@ -145,8 +144,6 @@ def run_local_search(
         ],
     )
 
-    communities: pd.DataFrame = dataframe_dict["communities"]
-    community_reports: pd.DataFrame = dataframe_dict["community_reports"]
     text_units: pd.DataFrame = dataframe_dict["text_units"]
     relationships: pd.DataFrame = dataframe_dict["relationships"]
     entities: pd.DataFrame = dataframe_dict["entities"]
@@ -168,8 +165,8 @@ def run_local_search(
             async for stream_chunk in api.local_search_streaming(
                 config=config,
                 entities=entities,
-                communities=communities,
-                community_reports=community_reports,
+                communities=None,
+                community_reports=None,
                 text_units=text_units,
                 relationships=relationships,
                 covariates=covariates,
@@ -191,8 +188,8 @@ def run_local_search(
         api.local_search(
             config=config,
             entities=entities,
-            communities=communities,
-            community_reports=community_reports,
+            communities=None,
+            community_reports=None,
             text_units=text_units,
             relationships=relationships,
             covariates=covariates,

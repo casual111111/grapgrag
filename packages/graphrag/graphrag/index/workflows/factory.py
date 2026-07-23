@@ -55,9 +55,7 @@ _standard_workflows = [
     "extract_graph",
     "finalize_graph",
     "extract_covariates",
-    "create_communities",
     "create_final_text_units",
-    "create_community_reports",
     "generate_text_embeddings",
 ]
 _fast_workflows = [
@@ -66,9 +64,7 @@ _fast_workflows = [
     "extract_graph_nlp",
     "prune_graph",
     "finalize_graph",
-    "create_communities",
     "create_final_text_units",
-    "create_community_reports_text",
     "generate_text_embeddings",
 ]
 _update_workflows = [
@@ -76,8 +72,6 @@ _update_workflows = [
     "update_entities_relationships",
     "update_text_units",
     "update_covariates",
-    "update_communities",
-    "update_community_reports",
     "update_text_embeddings",
     "update_clean_state",
 ]

@@ -196,20 +196,20 @@
 
 -输出格式-
 实体记录格式：
-("entity"{tuple_delimiter}<entity_name>{tuple_delimiter}<entity_type>{tuple_delimiter}<entity_description>)
+("entity"<|><entity_name><|><entity_type><|><entity_description>)
 
 关系记录格式：
-("relationship"{tuple_delimiter}<source_entity>{tuple_delimiter}<target_entity>{tuple_delimiter}<relationship_description>{tuple_delimiter}<relationship_strength>)
+("relationship"<|><source_entity><|><target_entity><|><relationship_description><|><relationship_strength>)
 
 严格遵守以下输出要求：
 1. 先输出全部实体，再输出全部关系。
-2. 记录之间仅使用 {record_delimiter} 分隔。
-3. 最后一条记录之后输出 {completion_delimiter}，不要再添加记录分隔符。
+2. 记录之间仅使用 ## 分隔。
+3. 最后一条记录之后输出 <|COMPLETE|>，不要再添加记录分隔符。
 4. 除实体记录、关系记录和结束符外，不得输出标题、解释、Markdown、代码围栏或任何其他内容。
 5. 每条记录保持为单独一行；字段内容中不得主动使用上述分隔符。
 6. entity_type 只能是 concept、state、event、rule、formula、config_param 之一，必须使用小写英文。
 7. relationship_strength 必须是 1 至 10 的整数，不得使用文字或小数。
-8. 如果没有识别到符合条件的实体，只输出 {completion_delimiter}。
+8. 如果没有识别到符合条件的实体，只输出 <|COMPLETE|>。
 
 -示例-
 ######################
@@ -228,38 +228,38 @@ text:
 逾期贷款订单的罚金按“逾期罚金 = 逾期本金 × 逾期天数 × 日罚金率”计算。日罚金率由运营人员按贷款产品配置。
 ------------------------
 output:
-("entity"{tuple_delimiter}贷款订单{tuple_delimiter}concept{tuple_delimiter}记录会员借款金额、期限、费用及还款情况的借贷凭证，可处于待还款、逾期或结清等生命周期状态)
-{record_delimiter}
-("entity"{tuple_delimiter}还款记录{tuple_delimiter}concept{tuple_delimiter}会员提交还款请求后生成的业务记录，用于记录本次还款操作及其处理结果)
-{record_delimiter}
-("entity"{tuple_delimiter}待还款{tuple_delimiter}state{tuple_delimiter}贷款订单尚有应还款项、正在等待会员还款的生命周期状态)
-{record_delimiter}
-("entity"{tuple_delimiter}逾期{tuple_delimiter}state{tuple_delimiter}贷款订单超过约定还款期限仍未完成还款的生命周期状态)
-{record_delimiter}
-("entity"{tuple_delimiter}结清{tuple_delimiter}state{tuple_delimiter}贷款订单全部应还款项已经偿还完毕的生命周期终态)
-{record_delimiter}
-("entity"{tuple_delimiter}会员发起还款{tuple_delimiter}event{tuple_delimiter}会员选择贷款订单并提交还款请求的业务事件，该事件会生成还款记录并触发还款金额一致性校验)
-{record_delimiter}
-("entity"{tuple_delimiter}还款金额一致性校验{tuple_delimiter}rule{tuple_delimiter}会员提交还款请求时，还款金额必须与贷款订单当前应还金额一致，否则系统拒绝本次请求)
-{record_delimiter}
-("entity"{tuple_delimiter}逾期罚金计算{tuple_delimiter}formula{tuple_delimiter}逾期罚金 = 逾期本金 × 逾期天数 × 日罚金率，用于计算逾期贷款订单需要承担的罚金)
-{record_delimiter}
-("entity"{tuple_delimiter}日罚金率{tuple_delimiter}config_param{tuple_delimiter}由运营人员按贷款产品配置的费率参数，用于逾期罚金计算并影响最终罚金金额)
-{record_delimiter}
-("relationship"{tuple_delimiter}贷款订单{tuple_delimiter}待还款{tuple_delimiter}待还款是贷款订单尚有应还款项时所处的生命周期状态{tuple_delimiter}9)
-{record_delimiter}
-("relationship"{tuple_delimiter}贷款订单{tuple_delimiter}逾期{tuple_delimiter}逾期是贷款订单超过约定期限仍未完成还款时所处的生命周期状态{tuple_delimiter}9)
-{record_delimiter}
-("relationship"{tuple_delimiter}贷款订单{tuple_delimiter}结清{tuple_delimiter}结清是贷款订单全部应还款项偿还完毕后进入的生命周期终态{tuple_delimiter}9)
-{record_delimiter}
-("relationship"{tuple_delimiter}会员发起还款{tuple_delimiter}还款记录{tuple_delimiter}会员提交还款请求后，系统会生成相应的还款记录{tuple_delimiter}10)
-{record_delimiter}
-("relationship"{tuple_delimiter}还款金额一致性校验{tuple_delimiter}会员发起还款{tuple_delimiter}会员发起还款时必须执行还款金额一致性校验，校验不通过则拒绝请求{tuple_delimiter}9)
-{record_delimiter}
-("relationship"{tuple_delimiter}逾期罚金计算{tuple_delimiter}贷款订单{tuple_delimiter}逾期罚金计算用于确定逾期贷款订单需要承担的罚金金额{tuple_delimiter}8)
-{record_delimiter}
-("relationship"{tuple_delimiter}日罚金率{tuple_delimiter}逾期罚金计算{tuple_delimiter}日罚金率是逾期罚金计算公式中的可配置乘数，直接影响罚金结果{tuple_delimiter}10)
-{completion_delimiter}
+("entity"<|>贷款订单<|>concept<|>记录会员借款金额、期限、费用及还款情况的借贷凭证，可处于待还款、逾期或结清等生命周期状态)
+##
+("entity"<|>还款记录<|>concept<|>会员提交还款请求后生成的业务记录，用于记录本次还款操作及其处理结果)
+##
+("entity"<|>待还款<|>state<|>贷款订单尚有应还款项、正在等待会员还款的生命周期状态)
+##
+("entity"<|>逾期<|>state<|>贷款订单超过约定还款期限仍未完成还款的生命周期状态)
+##
+("entity"<|>结清<|>state<|>贷款订单全部应还款项已经偿还完毕的生命周期终态)
+##
+("entity"<|>会员发起还款<|>event<|>会员选择贷款订单并提交还款请求的业务事件，该事件会生成还款记录并触发还款金额一致性校验)
+##
+("entity"<|>还款金额一致性校验<|>rule<|>会员提交还款请求时，还款金额必须与贷款订单当前应还金额一致，否则系统拒绝本次请求)
+##
+("entity"<|>逾期罚金计算<|>formula<|>逾期罚金 = 逾期本金 × 逾期天数 × 日罚金率，用于计算逾期贷款订单需要承担的罚金)
+##
+("entity"<|>日罚金率<|>config_param<|>由运营人员按贷款产品配置的费率参数，用于逾期罚金计算并影响最终罚金金额)
+##
+("relationship"<|>贷款订单<|>待还款<|>待还款是贷款订单尚有应还款项时所处的生命周期状态<|>9)
+##
+("relationship"<|>贷款订单<|>逾期<|>逾期是贷款订单超过约定期限仍未完成还款时所处的生命周期状态<|>9)
+##
+("relationship"<|>贷款订单<|>结清<|>结清是贷款订单全部应还款项偿还完毕后进入的生命周期终态<|>9)
+##
+("relationship"<|>会员发起还款<|>还款记录<|>会员提交还款请求后，系统会生成相应的还款记录<|>10)
+##
+("relationship"<|>还款金额一致性校验<|>会员发起还款<|>会员发起还款时必须执行还款金额一致性校验，校验不通过则拒绝请求<|>9)
+##
+("relationship"<|>逾期罚金计算<|>贷款订单<|>逾期罚金计算用于确定逾期贷款订单需要承担的罚金金额<|>8)
+##
+("relationship"<|>日罚金率<|>逾期罚金计算<|>日罚金率是逾期罚金计算公式中的可配置乘数，直接影响罚金结果<|>10)
+<|COMPLETE|>
 ######################
 
 -实际数据-

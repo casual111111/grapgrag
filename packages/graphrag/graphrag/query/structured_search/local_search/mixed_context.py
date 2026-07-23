@@ -169,8 +169,12 @@ class LocalSearchMixedContext(LocalContextBuilder):
                     self.tokenizer.encode(conversation_history_context)
                 )
 
-        # build community context
-        community_tokens = max(int(max_context_tokens * community_prop), 0)
+        # Empty community reports disable community context and return its budget
+        # to the local entity/relationship/covariate context.
+        effective_community_prop = community_prop if self.community_reports else 0.0
+        community_tokens = max(
+            int(max_context_tokens * effective_community_prop), 0
+        )
         community_context, community_context_data = self._build_community_context(
             selected_entities=selected_entities,
             max_context_tokens=community_tokens,
@@ -186,7 +190,7 @@ class LocalSearchMixedContext(LocalContextBuilder):
             final_context_data = {**final_context_data, **community_context_data}
 
         # build local (i.e. entity-relationship-covariate) context
-        local_prop = 1 - community_prop - text_unit_prop
+        local_prop = 1 - effective_community_prop - text_unit_prop
         local_tokens = max(int(max_context_tokens * local_prop), 0)
         local_context, local_context_data = self._build_local_context(
             selected_entities=selected_entities,
