@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 r"""
-python eval\batch_query.py --input-dir eval\KB-QA-eval_all.jsonl  --output-dir eval\eval_all_plus
+ python eval\batch_query.py --input-dir eval\QA.json  --output-dir eval\eval_flash  
 GraphRAG 批量查询脚本（API 直调版）— community 版本
 
 改进点（相比 subprocess 版本）：

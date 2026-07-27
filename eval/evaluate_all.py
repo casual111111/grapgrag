@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+python eval/evaluate_all.py --gold eval/QA.json --results eval\eval_neo4j\neo_batch_context.txt --output eval\eval_neo4j\eval_result.jsonl -c 10 
 python eval/evaluate_all.py --gold eval/QA.json --results eval\eval_flash\batch_query_context.txt --output eval\eval_flash\eval_result.jsonl -c 8  
 
 输入：标准答案文件（JSONL）+ 查询结果文件（TXT/JSONL，含上下文和生成答案）
